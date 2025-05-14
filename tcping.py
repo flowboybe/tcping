@@ -12,7 +12,8 @@ def parse_args():  # Парсит данные с командной строк�
     parser = argparse.ArgumentParser()
     parser.add_argument('host', type=str,
                         help='IP адрес на который будет отправлен запрос (Поддерживается как домен, так и IP)')
-    parser.add_argument('-p', '--port', type=int, default=80, help='Порт для отправки запроса, по умолчанию 80')
+    parser.add_argument('-p', '--port', type=int, default=80,
+                        help='Порт для отправки запроса, по умолчанию 80')
     parser.add_argument('-t', '--timeout', type=float, default=5,
                         help='Время ожидания ответа в секундах, по умолчанию 5 секунд')
     parser.add_argument('-i', '--interval', type=float, default=1,
@@ -26,35 +27,39 @@ def parse_args():  # Парсит данные с командной строк�
 def check_errors(port, interval, timeout, count):
     if port < 0 or port > 65535:
         print('Выбранного порта не существует.')
-        sys.exit()
+        sys.exit(1)
     if interval < 0:
         print('Интервал между запросами не может быть меньше 0 секунд.')
-        sys.exit()
+        sys.exit(1)
     if timeout < 0:
         print('Время ожидания не может быть меньше 0 секунд.')
-        sys.exit()
+        sys.exit(1)
     if count < 0:
         print('Количество отправляемых запросов не может быть меньше 0.')
-        sys.exit()
+        sys.exit(1)
 
 
 def print_statistics(outer_data):
     print(
-        f'Отправлено {outer_data [1]} пакетов, получено {outer_data [2]} пакетов, процент потерь - {int((1 - outer_data [2] / outer_data [1]) * 100)}%')
+        f'Отправлено {outer_data [1]} пакетов,'
+        f' получено {outer_data [2]} пакетов,'
+        f' процент потерь - {int((1 - outer_data [2] / outer_data [1]) * 100)}%')
     if len(outer_data [0]) != 0:
         print(
-            f'Время ожидания: Максимальное = {max(outer_data [0])}мс, Минимальное = {min(outer_data [0])}мс, Среднее = {round(sum(outer_data [0]) / len(outer_data [0]), 2)}мс')
+            f'Время ожидания: Максимальное = {max(outer_data [0])}мс,'
+            f' Минимальное = {min(outer_data [0])}мс,'
+            f' Среднее = {round(sum(outer_data [0]) / len(outer_data [0]), 2)}мс')
 
 
 def main():
     args = parse_args()
     check_errors(args.port, args.interval, args.timeout, args.count)
-    if not args.host [0].isdigit():
+    if not args.host[0].isdigit():
         try:
             dst_ip = socket.gethostbyname(args.host)
         except socket.gaierror:
             print('Указанного доменного имени не существует.')
-            sys.exit()
+            sys.exit(1)
     else:
         dst_ip = args.host
     if dst_ip == '127.0.0.1':
