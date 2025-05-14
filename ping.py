@@ -3,7 +3,7 @@ import socket
 import struct
 import time
 
-from packet_builder import build_packet
+from packet_builder import build_syn_packet
 
 
 def ping(src_ip, dst_ip, src_port, dst_port, timeout, interval, count,
@@ -13,28 +13,30 @@ def ping(src_ip, dst_ip, src_port, dst_port, timeout, interval, count,
     s.settimeout(timeout)
     while count:
         seq = random.randint(1, 10000000)
-        tcp_packet = build_packet(src_ip, dst_ip, src_port, dst_port, seq, 2)
+        tcp_packet = build_syn_packet(src_ip, dst_ip, src_port, dst_port, seq)
         start_time = time.time()
         s.sendto(tcp_packet, (dst_ip, dst_port))
-        outer_data [1] += 1
+        outer_data[1] += 1
 
         try:
             while True: # Ждем получение пакета, пока не выйдет время
-                response = s.recvfrom(1024)
+                response = s.recvfrom(40)
                 if not response: continue
                 data, _ = response
 
                 ip_header = data [0:20]  # Распаковка IPv4 заголовка
                 iph = struct.unpack('!BBHHHBBH4s4s', ip_header)
-                src_ip_packet = socket.inet_ntoa(iph [8])
-                dst_ip_packet = socket.inet_ntoa(iph [9])
+                # print(iph)
+                src_ip_packet = socket.inet_ntoa(iph[8])
+                dst_ip_packet = socket.inet_ntoa(iph[9])
 
                 tcp_header = data [20:40]  # Распаковка TCP заголовка
                 tcph = struct.unpack('!HHLLBBHHH', tcp_header)
-                src_port_packet = tcph [0]
-                dst_port_packet = tcph [1]
-                ack_num = tcph [3]
-                flags = tcph [5]
+                # print(tcph)
+                src_port_packet = tcph[0]
+                dst_port_packet = tcph[1]
+                ack_num = tcph[3]
+                flags = tcph[5]
 
                 if (src_ip_packet == dst_ip and dst_ip_packet == src_ip and
                         src_port_packet == dst_port and dst_port_packet == src_port and ack_num == seq + 1):  # Проверка на корректность пакета
@@ -42,8 +44,8 @@ def ping(src_ip, dst_ip, src_port, dst_port, timeout, interval, count,
                     if (flags & 0x14) == 0x14:  # Проверка на RST + ACK флаг
                         print(f'Порт {dst_port} закрыт.')
                     elif (flags & 0x12) == 0x12:  # Проверка на ACK флаг
-                        outer_data [0].append(ack_time)
-                        outer_data [2] += 1
+                        outer_data[0].append(ack_time)
+                        outer_data[2] += 1
                         print(f'Получен пакет от {src_ip_packet}:{src_port_packet}, время = {ack_time}мс')
                     break
 
