@@ -12,7 +12,7 @@ def parse_args():  # Парсит данные с командной строк�
     parser = argparse.ArgumentParser()
     parser.add_argument('host', type=str,
                         help='IP адрес на который будет отправлен запрос (Поддерживается как домен, так и IP)')
-    parser.add_argument('-p', '--port', type=float, default=80, help='Порт для отправки запроса, по умолчанию 80')
+    parser.add_argument('-p', '--port', type=int, default=80, help='Порт для отправки запроса, по умолчанию 80')
     parser.add_argument('-t', '--timeout', type=float, default=5,
                         help='Время ожидания ответа в секундах, по умолчанию 5 секунд')
     parser.add_argument('-i', '--interval', type=float, default=1,
@@ -57,7 +57,10 @@ def main():
             sys.exit()
     else:
         dst_ip = args.host
-    src_ip = network_utils.get_ip()
+    if dst_ip == '127.0.0.1':
+        src_ip = '127.0.0.1'
+    else:
+        src_ip = network_utils.get_local_ip()
     free_port = network_utils.check_free_port()
     outer_data = [[], 0, 0]
     print(f'Начинаю отправку TCP пакетов на {dst_ip}:{args.port} от {src_ip}:{free_port}')

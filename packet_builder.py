@@ -24,8 +24,8 @@ def calculate_check_sum(msg):  # Считает контрольную сумм�
     is_even = len(msg) % 2
     for i in range(0, len(msg) - is_even, 2):
         sum_ += (msg [i]) + ((msg [i + 1]) << 8)
-    if is_even:
-        sum_ += (msg [len(msg) - is_even + 1])
+    if len(msg) % 2 != 0:
+        sum_ += msg [-1] << 8
     while sum_ >> 16:
         sum_ = (sum_ & 0xFFFF) + (sum_ >> 16)
     sum_ = ~sum_ & 0xffff

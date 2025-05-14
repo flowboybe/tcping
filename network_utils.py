@@ -1,7 +1,7 @@
 import socket
 
 
-def get_ip():  # Возвращает IP адрес компьютера пользователя
+def get_local_ip():  # Возвращает IP адрес компьютера пользователя
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
     s.connect(('8.8.8.8', 80))
     return s.getsockname() [0]
