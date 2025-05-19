@@ -2,9 +2,10 @@ import struct
 import socket
 import time
 import random
+import info
 
 
-def build_syn_packet(src_ip, dst_ip, src_port, dst_port, seq):  # Собирает TCP пакет
+def build_syn_packet(src_ip, dst_ip, src_port, dst_port, seq, version, verbose):  # Собирает TCP пакет
     packet = struct.pack(
         '!HHIIBBHHH', # Структура полей TCP заголовка
         src_port, # Порт отправления
@@ -18,37 +19,61 @@ def build_syn_packet(src_ip, dst_ip, src_port, dst_port, seq):  # Собирае
         0 # Указатель срочности
     )
 
-    pseudo_header = struct.pack(
-        '!4s4sHH', #Структура полей псевдозаголовка
-        socket.inet_aton(src_ip), #IP источника
-        socket.inet_aton(dst_ip), #IP получателя
-        socket.IPPROTO_TCP, # Протокол
-        len(packet) # Длина TCP пакета
+    if version == 4:
+        pseudo_header = struct.pack(
+            '!4s4sHH', # Структура полей псевдозаголовка
+            socket.inet_aton(src_ip), #IP источника
+            socket.inet_aton(dst_ip), #IP получателя
+            socket.IPPROTO_TCP, # Протокол
+            len(packet) # Длина TCP пакета
     )
+    elif version == 6:
+        pseudo_header = struct.pack(
+            '!16s16sII',
+            socket.inet_pton(socket.AF_INET6, src_ip),
+            socket.inet_pton(socket.AF_INET6, dst_ip),
+            len(packet),
+            socket.IPPROTO_TCP
+        )
+    else:
+        raise TypeError
 
     checksum = calculate_check_sum(pseudo_header + packet)
     packet = packet [:16] + struct.pack('H', checksum) + packet [18:] # Заменяет нулевые байты контрольной суммы
 
+    if verbose:
+        info.print_syn_info(packet)
+
     return packet
 
 
-def send_packet(s, src_ip, dst_ip, src_port, dst_port):
+def send_packet(s, src_ip, dst_ip, src_port, dst_port, version, verbose):
     seq = random.randint(1, 10000000)
-    tcp_packet = build_syn_packet(src_ip, dst_ip, src_port, dst_port, seq)
+    tcp_packet = build_syn_packet(src_ip, dst_ip, src_port, dst_port, seq, version, verbose)
     start_time = time.time()
-    s.sendto(tcp_packet, (dst_ip, dst_port))
+    if version == 4:
+        s.sendto(tcp_packet, (dst_ip, dst_port))
+    elif version == 6:
+        s.sendto(tcp_packet, (dst_ip, dst_port, 0, 0))
+    else:
+        raise TypeError
 
     return seq, start_time
 
 
-def receive_packet(s, src_ip, src_port, dst_ip, dst_port, start_time, outer_data, seq):
+def receive_packet(s, src_ip, src_port, dst_ip, dst_port, start_time, outer_data, seq, version, verbose):
     try:
         while True:  # Ждем получение пакета, пока не выйдет время
             response = s.recvfrom(40)
             if not response: continue
             data, _ = response
 
-            src_ip_packet, dst_ip_packet, src_port_packet, dst_port_packet, ack_num, flags = unpack_packet(data)
+            if version == 4:
+                src_ip_packet, dst_ip_packet, src_port_packet, dst_port_packet, ack_num, flags = unpack_ipv4_packet(data)
+            elif version == 6:
+                src_ip_packet, dst_ip_packet, src_port_packet, dst_port_packet, ack_num, flags = unpack_ipv6_packet(data)
+            else:
+                raise TypeError
 
             if (src_ip_packet == dst_ip
             and dst_ip_packet == src_ip
@@ -62,6 +87,8 @@ def receive_packet(s, src_ip, src_port, dst_ip, dst_port, start_time, outer_data
                     outer_data [0].append(ack_time)
                     outer_data [2] += 1
                     print(f'Получен пакет от {src_ip_packet}:{src_port_packet}, время = {ack_time}мс')
+                if verbose:
+                    info.print_ack_info(data[20:40])
                 break
 
     except socket.timeout:  # Если ответ не пришел
@@ -86,7 +113,7 @@ def calculate_check_sum(data):  # Считает контрольную сумм
     return summ
 
 
-def unpack_packet(data): # Распаковывает полученный пакет
+def unpack_ipv4_packet(data): # Распаковывает полученный пакет
     ip_header = data [0:20]  # Распаковка IPv4 заголовка
     iph = struct.unpack('!BBHHHBBH4s4s', ip_header)
     src_ip_packet = socket.inet_ntoa(iph [8])
@@ -98,5 +125,20 @@ def unpack_packet(data): # Распаковывает полученный па�
     dst_port_packet = tcph [1]
     ack_num = tcph [3]
     flags = tcph [5]
+
+    return src_ip_packet, dst_ip_packet, src_port_packet, dst_port_packet, ack_num, flags
+
+def unpack_ipv6_packet(data):
+    ip_header = data[:40]
+    iph = struct.unpack('!IHBB16s16s', ip_header[:40])
+    src_ip_packet = socket.inet_ntop(socket.AF_INET6, iph[4])
+    dst_ip_packet = socket.inet_ntop(socket.AF_INET6, iph[5])
+
+    tcp_header = data[40:60]
+    tcph = struct.unpack('!HHLLBBHHH', tcp_header)
+    src_port_packet = tcph[0]
+    dst_port_packet = tcph[1]
+    ack_num = tcph[3]
+    flags = tcph[5]
 
     return src_ip_packet, dst_ip_packet, src_port_packet, dst_port_packet, ack_num, flags
