@@ -67,14 +67,11 @@ def get_info():
             print('Указанного доменного имени не существует.')
             sys.exit(1)
     else:
-        if ipv == 6:
-            dst_ip = network_utils.get_local_ip(6)
-        else:
-            dst_ip = args.host
+        dst_ip = args.host
     if dst_ip == '127.0.0.1':
         src_ip = '127.0.0.1'
     else:
-        src_ip = network_utils.get_local_ip(4)
+        src_ip = network_utils.get_local_ip(ipv)
     free_port = network_utils.check_free_port()
     return dst_ip, args.port, src_ip, free_port, args.timeout, args.interval, args.count, ipv, args.verbose
 

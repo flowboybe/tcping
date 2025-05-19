@@ -1,5 +1,4 @@
 import socket
-import struct
 import time
 
 from packet_manager import send_packet, receive_packet

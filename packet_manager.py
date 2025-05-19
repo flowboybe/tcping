@@ -18,7 +18,6 @@ def build_syn_packet(src_ip, dst_ip, src_port, dst_port, seq, version, verbose):
         0, # Контрольная сумма
         0 # Указатель срочности
     )
-
     if version == 4:
         pseudo_header = struct.pack(
             '!4s4sHH', # Структура полей псевдозаголовка
