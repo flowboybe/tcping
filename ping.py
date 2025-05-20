@@ -13,7 +13,7 @@ def ping(src_ip, dst_ip, src_port, dst_port, timeout, interval, count,
     else:
         raise TypeError
     s = socket.socket(ip_prot, socket.SOCK_RAW,
-                      socket.IPPROTO_TCP)  # RAW-socket для ручного формирования TCP, но автоматического IPv4
+                      socket.IPPROTO_TCP)  # RAW-socket для ручного формирования TCP, но автоматического IPv4/IPv6
     s.settimeout(timeout)
     while count:
         seq, start_time = send_packet(s, src_ip, dst_ip, src_port, dst_port, version, verbose)
