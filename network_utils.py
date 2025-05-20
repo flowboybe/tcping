@@ -14,7 +14,7 @@ def get_local_ip(version):  # Возвращает IP адрес компьют�
     s.connect((dns_ip, 80))
     return s.getsockname()[0]
 
-def is_valid_ipv6(ip):
+def is_valid_ipv6(ip): # Проверяет IPv6 на валидность
     try:
         socket.inet_pton(socket.AF_INET6, ip)
         return True

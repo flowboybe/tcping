@@ -19,7 +19,7 @@ def ping(src_ip, dst_ip, src_port, dst_port, timeout, interval, count,
         seq, start_time = send_packet(s, src_ip, dst_ip, src_port, dst_port, version, verbose)
         outer_data [1] += 1
 
-        receive_packet(s, src_ip, src_port, dst_ip, dst_port, start_time, outer_data, seq, version, verbose)
+        receive_packet(s, src_port, dst_ip, dst_port, start_time, outer_data, seq, version, verbose)
 
         count -= 1
         time.sleep(interval)
