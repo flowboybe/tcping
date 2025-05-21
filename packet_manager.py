@@ -54,7 +54,7 @@ def send_packet(s, src_ip, dst_ip, src_port, dst_port, version, verbose):
     if version == 4:
         s.sendto(tcp_packet, (dst_ip, dst_port))
     elif version == 6:
-        s.sendto(tcp_packet, (dst_ip, dst_port, 0, 0))
+        s.sendto(tcp_packet, (dst_ip, 0, 0, 0))
     else:
         raise TypeError
 

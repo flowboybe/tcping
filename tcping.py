@@ -2,7 +2,6 @@
 
 import socket
 import argparse
-
 import network_utils
 import sys
 
@@ -13,17 +12,19 @@ from ping import ping
 def parse_args():  # Парсит данные с командной строки
     parser = argparse.ArgumentParser()
     parser.add_argument('host', type=str,
-                        help= 'IP адрес на который будет отправлен запрос (Поддерживается как домен, так и IP)')
+                        help='IP адрес на который будет отправлен запрос (Поддерживается как домен, так и IP)')
     parser.add_argument('-p', '--port', type=int, default=80,
-                        help= 'Порт для отправки запроса, по умолчанию 80')
+                        help='Порт для отправки запроса, по умолчанию 80')
     parser.add_argument('-t', '--timeout', type=float, default=5,
-                        help= 'Время ожидания ответа в секундах, по умолчанию 5 секунд')
+                        help='Время ожидания ответа в секундах, по умолчанию 5 секунд')
     parser.add_argument('-i', '--interval', type=float, default=1,
-                        help= 'Интервал между запросами в секундах, по умолчанию 1 секунда')
+                        help='Интервал между запросами в секундах, по умолчанию 1 секунда')
     parser.add_argument('-n', '--count', type=int, default=float('Inf'),
-                        help= 'Количество запросов, по умолчанию бесконечно')
+                        help='Количество запросов, по умолчанию бесконечно')
     parser.add_argument('-v', '--verbose', action='store_true',
-                        help= 'Режим просмотра содержимого пакетов')
+                        help='Режим просмотра содержимого пакетов')
+    parser.add_argument('-ipv6', '--ipversion6', action='store_true',
+                        help='Режим отправки пакетов на адреса IPv6')
     args = parser.parse_args()
     return args
 
@@ -57,17 +58,10 @@ def print_statistics(outer_data):
 
 def get_info():
     args = parse_args()
-    if network_utils.is_valid_ipv6(args.host): ipv = 6
-    else: ipv = 4
     check_errors(args.port, args.interval, args.timeout, args.count)
-    if not args.host [0].isdigit() and ipv != 6:
-        try:
-            dst_ip = socket.gethostbyname(args.host)
-        except socket.gaierror:
-            print('Указанного доменного имени не существует.')
-            sys.exit(1)
-    else:
-        dst_ip = args.host
+    if args.ipversion6: ipv = 6
+    else: ipv = 4
+    dst_ip = network_utils.get_ping_addr(args.host, args.ipversion6)
     if dst_ip == '127.0.0.1':
         src_ip = '127.0.0.1'
     else:

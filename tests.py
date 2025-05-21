@@ -113,7 +113,8 @@ class Tests(unittest.TestCase):
 
 
     def test_ipv_unpacking(self): # Проверка на корректность распаковки пакета
-        testing_packet = b'E\x00\x00,\x00\x00@\x00x\x06\x87\x00\xd1U\xe9d\xc0\xa8\x00i\x00P\xc0\x00\x1b\xa8\x14?\x001\xcc\xab`\x12\xff\xff_\x86\x00\x00'
+        testing_packet = \
+            b'E\x00\x00,\x00\x00@\x00x\x06\x87\x00\xd1U\xe9d\xc0\xa8\x00i\x00P\xc0\x00\x1b\xa8\x14?\x001\xcc\xab`\x12\xff\xff_\x86\x00\x00'
         data = unpack_ipv_packet(testing_packet, 4)
         self.assertEqual(data, (80, 49152, 3263659, 18))
 
