@@ -39,10 +39,10 @@ def build_syn_packet(src_ip, dst_ip, src_port, dst_port, seq, version, verbose):
         raise TypeError
 
     checksum = calculate_check_sum(pseudo_header + packet)
-    packet = packet [:16] + struct.pack('H', checksum) + packet [18:] # Заменяет нулевые байты контрольной суммы
+    packet = packet[:16] + struct.pack('H', checksum) + packet [18:] # Заменяет нулевые байты контрольной суммы
 
     if verbose:
-        info.print_syn_info(packet)
+        info.print_info(packet, 'SYN')
 
     return packet
 
@@ -81,7 +81,7 @@ def receive_packet(s, src_port, dst_ip, dst_port, start_time, outer_data, seq, v
                     outer_data[2] += 1
                     print(f'Получен пакет от {dst_ip}:{dst_port}, время = {ack_time}мс.')
                 if verbose:
-                    info.print_ack_info(data[20:40])
+                    info.print_info(data[20:40], 'ACK')
                 break
 
     except socket.timeout:  # Если ответ не пришел
@@ -108,7 +108,7 @@ def calculate_check_sum(data):  # Считает контрольную сумм
 
 def unpack_ipv_packet(data, version): # Распаковывает полученный пакет
     if version == 4:
-        tcp_header = data [20:40] # Распаковка TCP заголовка
+        tcp_header = data[20:40] # Распаковка TCP заголовка
     else:
         tcp_header = data[40:60]
     tcph = struct.unpack('!HHLLBBHHH', tcp_header)
