@@ -48,12 +48,12 @@ def print_statistics(outer_data):
     print(
         f'Отправлено {outer_data [1]} пакетов,'
         f' получено {outer_data [2]} пакетов,'
-        f' процент потерь - {int((1 - outer_data [2] / outer_data [1]) * 100)}%')
-    if len(outer_data [0]) != 0:
+        f' процент потерь - {int((1 - outer_data[2] / outer_data[1]) * 100)}%')
+    if len(outer_data[0]) != 0:
         print(
-            f'Время ожидания: Максимальное = {max(outer_data [0])}мс,'
-            f' Минимальное = {min(outer_data [0])}мс,'
-            f' Среднее = {round(sum(outer_data [0]) / len(outer_data [0]), 2)}мс')
+            f'Время ожидания: Максимальное = {max(outer_data[0])}мс,'
+            f' Минимальное = {min(outer_data[0])}мс,'
+            f' Среднее = {round(sum(outer_data[0]) / len(outer_data[0]), 2)}мс')
 
 
 def get_info():

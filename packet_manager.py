@@ -77,8 +77,8 @@ def receive_packet(s, src_port, dst_ip, dst_port, start_time, outer_data, seq, v
                 if (flags & 0x14) == 0x14:  # Проверка на RST + ACK флаг
                     print(f'Порт {dst_port} закрыт.')
                 elif (flags & 0x12) == 0x12:  # Проверка на ACK флаг
-                    outer_data [0].append(ack_time)
-                    outer_data [2] += 1
+                    outer_data[0].append(ack_time)
+                    outer_data[2] += 1
                     print(f'Получен пакет от {dst_ip}:{dst_port}, время = {ack_time}мс.')
                 if verbose:
                     info.print_ack_info(data[20:40])
@@ -112,9 +112,9 @@ def unpack_ipv_packet(data, version): # Распаковывает получе�
     else:
         tcp_header = data[40:60]
     tcph = struct.unpack('!HHLLBBHHH', tcp_header)
-    src_port_packet = tcph [0]
-    dst_port_packet = tcph [1]
-    ack_num = tcph [3]
-    flags = tcph [5]
+    src_port_packet = tcph[0]
+    dst_port_packet = tcph[1]
+    ack_num = tcph[3]
+    flags = tcph[5]
 
     return src_port_packet, dst_port_packet, ack_num, flags
