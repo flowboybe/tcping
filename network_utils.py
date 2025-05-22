@@ -2,7 +2,7 @@ import socket
 import sys
 
 
-def get_ping_addr(host, v6):
+def get_ping_addr(host, v6): # Возвращает адрес на который будет отправлен запрос
     if v6:
         if is_valid_ipv6(host): return host
         else:
@@ -22,7 +22,6 @@ def get_ping_addr(host, v6):
         else:
             dst_ip = host
         return dst_ip
-
 
 
 def get_local_ip(version):  # Возвращает IP адрес компьютера пользователя
@@ -52,8 +51,8 @@ def get_ipv6_address(hostname):
         ipv6_addresses = [info[4][0] for info in addr_info]
         return ipv6_addresses
     except socket.gaierror:
-        return []
-
+        print('Данный компьютер не имеет IPv6 адреса.')
+        sys.exit(1)
 
 
 def check_free_port():  # Проверяет какой порт из высоких портов свободен на компьюютере отправителя

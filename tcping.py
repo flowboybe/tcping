@@ -8,7 +8,6 @@ import sys
 from ping import ping
 
 
-
 def parse_args():  # Парсит данные с командной строки
     parser = argparse.ArgumentParser()
     parser.add_argument('host', type=str,

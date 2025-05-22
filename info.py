@@ -1,6 +1,6 @@
 import struct
 
-def print_info(packet, flag_type):
+def print_info(packet, flag_type): # Подробная информация о пакете
     (src_port, dst_port, seq_num, ack_num,
      offset_reserved_flags, flags, window_size,
      checksum, urg_ptr) = struct.unpack('!HHIIBBHHH', packet[:20])
@@ -8,7 +8,7 @@ def print_info(packet, flag_type):
     if flag_type == 'SYN':
         flags_field = ((offset_reserved_flags << 8) | flags)
         data_offset = offset_reserved_flags >> 4
-    else:
+    elif flag_type == 'ACK':
         flags_field = offset_reserved_flags & 0x1FF
         data_offset = (offset_reserved_flags >> 12) & 0xF
 
